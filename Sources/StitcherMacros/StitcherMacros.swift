@@ -8,4 +8,4 @@
 ///
 /// produces a tuple `(x + y, "x + y")`.
 @freestanding(expression)
-public macro stringify<T>(_ value: T) -> (T, String) = #externalMacro(module: "StitcherMacrosMacros", type: "StringifyMacro")
+public macro stringify<T>(_ value: T) -> (T, String) = #externalMacro(module: "StitcherMacrosPlugins", type: "StringifyMacro")
