@@ -22,6 +22,11 @@ struct InjectedParametersConfiguration {
         self.ignoredParameters = ignoredParameters
     }
     
+    static func parsing(syntax node: AttributeSyntax) throws -> Self {
+        let parser = Parser()
+        return try parser.parse(syntax: node)
+    }
+    
     struct Parser {
         
         private enum Context: String, Hashable, CaseIterable {

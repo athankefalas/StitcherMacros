@@ -11,36 +11,9 @@ import SwiftSyntaxBuilder
 import SwiftCompilerPlugin
 
 public struct InjectedArgumentsMacro: PeerMacro {
+    typealias Diagnostic = InjectedArgumentsDiagnostic
     
-    public enum DiagnosticCode {
-        case unknown
-        case unexpectedDeclarationKind
-        case malformedArguments
-    }
-    
-    public struct Diagnostic: Error {
-        
-        public let code: DiagnosticCode
-        
-        init(code: DiagnosticCode) {
-            self.code = code
-        }
-    }
-    
-    private struct LogDiagnostic: Error, CustomStringConvertible {
-        
-        let message: String
-        
-        var description: String {
-            message
-        }
-        
-        init(_ message: String) {
-            self.message = message
-        }
-        
-    }
-    
+    private static let rawAttributeSyntax = "@InjectedArguments"
     
     public static func expansion(
         of node: AttributeSyntax,
@@ -48,8 +21,7 @@ public struct InjectedArgumentsMacro: PeerMacro {
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
         
-        let parameterParser = InjectedParametersConfiguration.Parser()
-        let parameters = try parameterParser.parse(syntax: node)
+        let configuration = try InjectedParametersConfiguration.parsing(syntax: node)
         
         switch declaration.kind {
         case .functionDecl:
@@ -57,14 +29,14 @@ public struct InjectedArgumentsMacro: PeerMacro {
                 of: node,
                 providingPeersOf: declaration,
                 in: context,
-                parameters: parameters
+                configuration: configuration
             )
         case .initializerDecl:
             return try injectedArgumentsInitializerExpansion(
                 of: node,
                 providingPeersOf: declaration,
                 in: context,
-                parameters: parameters
+                configuration: configuration
             )
         default:
             throw Diagnostic(code: .unexpectedDeclarationKind)
@@ -75,7 +47,7 @@ public struct InjectedArgumentsMacro: PeerMacro {
         of node: AttributeSyntax,
         providingPeersOf declaration: some DeclSyntaxProtocol,
         in context: some MacroExpansionContext,
-        parameters: InjectedParametersConfiguration
+        configuration: InjectedParametersConfiguration
     ) throws -> [DeclSyntax] {
         
         guard let originalFunction = declaration.as(FunctionDeclSyntax.self)?.trimmed else {
@@ -86,14 +58,24 @@ public struct InjectedArgumentsMacro: PeerMacro {
             return []
         }
         
-        var attributes = originalFunction.attributes.filter({ !$0.trimmed.description.contains("@InjectedArguments") })
+        let needsTrivia = originalFunction.attributes.count == 1
+        var attributes = originalFunction.attributes
+            .removingMacroDirective(Self.rawAttributeSyntax)
+            .addingDisfavoredOverload()
         
-        if !attributes.contains(where: { $0.trimmed.description == "@_disfavoredOverload" }) {
-            attributes.append(.attribute("@disfavoredOverload"))
+        if needsTrivia {
+            attributes.leadingTrivia = .newline
+            attributes.trailingTrivia = .newline
         }
-        
-        let ignoredParameters = parameters.ignoredParameters
+                
+        let ignoredParameters = configuration.ignoredParameters
         let originalParameters = originalFunction.signature.parameterClause.parameters
+        
+        try ensure(
+            configuration: configuration,
+            matchesParameters: originalParameters
+        )
+        
         let synthesizedParameters = originalParameters.filter({ ignoredParameters.contains($0) })
         let invocationParameters = originalParameters.map({
             InvocationParameter.wrap(from: $0, ignoredArguments: ignoredParameters)
@@ -115,15 +97,10 @@ public struct InjectedArgumentsMacro: PeerMacro {
             trailingTrivia: originalFunction.signature.trailingTrivia
         )
         
-        let invocation = callFunctionSyntax(
-            calling: originalFunction,
-            parameters: invocationParameters,
-            codeGenerator: parameters.generator
-        )
-        
-        var statements = CodeBlockItemListSyntax()
-        statements.append(
-            CodeBlockItemSyntax(item: CodeBlockItemSyntax.Item(invocation))
+        let invocation = FunctionInvocationSyntax(
+            configuration: configuration,
+            invokedFunctionDeclaration: originalFunction,
+            invocationParameters: invocationParameters
         )
         
         let function = FunctionDeclSyntax(
@@ -133,7 +110,7 @@ public struct InjectedArgumentsMacro: PeerMacro {
             originalFunction.unexpectedBetweenAttributesAndModifiers,
             modifiers: originalFunction.modifiers,
             originalFunction.unexpectedBetweenModifiersAndFuncKeyword,
-            funcKeyword: originalFunction.funcKeyword,
+            funcKeyword: originalFunction.funcKeyword.trimmed,
             originalFunction.unexpectedBetweenFuncKeywordAndName,
             name: originalFunction.name,
             originalFunction.unexpectedBetweenNameAndGenericParameterClause,
@@ -143,7 +120,7 @@ public struct InjectedArgumentsMacro: PeerMacro {
             originalFunction.unexpectedBetweenSignatureAndGenericWhereClause,
             genericWhereClause: originalFunction.genericWhereClause,
             originalFunction.unexpectedBetweenGenericWhereClauseAndBody,
-            body: CodeBlockSyntax(statements: statements),
+            body: invocation.blockWrappedSyntax(),
             originalFunction.unexpectedAfterBody,
             trailingTrivia: originalFunction.trailingTrivia
         )
@@ -157,7 +134,7 @@ public struct InjectedArgumentsMacro: PeerMacro {
         of node: AttributeSyntax,
         providingPeersOf declaration: some DeclSyntaxProtocol,
         in context: some MacroExpansionContext,
-        parameters: InjectedParametersConfiguration
+        configuration: InjectedParametersConfiguration
     ) throws -> [DeclSyntax] {
         
         guard declaration.kind == .functionDecl || declaration.kind == .initializerDecl else {
@@ -166,91 +143,19 @@ public struct InjectedArgumentsMacro: PeerMacro {
         
         return []
     }
-}
-
-func callFunctionSyntax(
-    calling function: FunctionDeclSyntax,
-    from callee: String? = nil,
-    parameters: [InvocationParameter],
-    codeGenerator: InjectionCodeGenerator
-) -> FunctionCallExprSyntax {
     
-    let invocation = invocationSyntax(calling: function, from: callee)
-    var argumentList = LabeledExprListSyntax()
-    
-    for parameterIndexPair in parameters.enumerated() {
-        let parameter = parameterIndexPair.element
-        let isLastParameter = parameterIndexPair.offset < parameters.count - 1
-        var labeledExpression = LabeledExprSyntax(
-            label: parameter.name,
-            expression: parameterValueSyntax(
-                of: parameter,
-                generator: codeGenerator
-            )
-        )
-                
-        if isLastParameter {
-            labeledExpression.trailingComma = .commaToken()
-        }
+    private static func ensure(
+        configuration: InjectedParametersConfiguration,
+        matchesParameters parameters: FunctionParameterListSyntax
+    ) throws {
         
-        argumentList.append(labeledExpression)
+        for ignoredParameter in configuration.ignoredParameters {
+            
+            guard !parameters.contains(where: { ignoredParameter.matches(syntax: $0) }) else {
+                continue
+            }
+            
+            throw InjectedArgumentsDiagnostic(code: .unknownIgnoredParameter(ignoredParameter.rawValue))
+        }
     }
-    
-    return FunctionCallExprSyntax(
-        leadingTrivia: nil,
-        calledExpression: invocation,
-        leftParen: .leftParenToken(),
-        arguments: argumentList,
-        rightParen: .rightParenToken(),
-        trailingTrivia: nil
-    )
-}
-
-func invocationSyntax(
-    calling function: FunctionDeclSyntax,
-    from callee: String?
-) -> ExprSyntax {
-    
-    let functionName = function.name.trimmed.text
-    let invocationExpression = invocationEffectSyntaxPrefix(for: function) + functionName
-    
-    guard let callee = callee, callee.count > 0 else {
-        return ExprSyntax(stringLiteral: invocationExpression)
-    }
-    
-    return ExprSyntax(stringLiteral: "\(callee).\(invocationExpression)")
-}
-
-func invocationEffectSyntaxPrefix(
-    for function: FunctionDeclSyntax
-) -> String {
-    
-    var prefix = ""
-    
-    if function.signature.effectSpecifiers?.throwsSpecifier != nil {
-        prefix += "try "
-    }
-    
-    if function.signature.effectSpecifiers?.asyncSpecifier != nil {
-        prefix += "await "
-    }
-    
-    return prefix
-}
-
-func parameterValueSyntax(
-    of parameter: InvocationParameter,
-    generator: InjectionCodeGenerator
-) -> ExprSyntax {
-    
-    if let forwardedValue = parameter.forwardedValue {
-        return ExprSyntax(stringLiteral: forwardedValue)
-    }
-    
-    let generatedCode = generator.generateInjectionExpression(
-        parameterName: parameter.name,
-        parameterTypeName: parameter.wrappedValue.type.trimmed.description
-    )
-    
-    return ExprSyntax(stringLiteral: generatedCode)
 }

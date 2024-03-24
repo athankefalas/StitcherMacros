@@ -12,6 +12,12 @@ struct IgnoredParameter: RawRepresentable, Hashable {
     init(rawValue: String) {
         self.rawValue = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
     }
+    
+    func matches(syntax: FunctionParameterSyntax) -> Bool {
+        let firstName = IgnoredParameter(rawValue: syntax.trimmed.firstName.trimmed.text)
+        let secondName = IgnoredParameter(rawValue: syntax.trimmed.secondName?.trimmed.text ?? "")
+        return self == firstName || self == secondName
+    }
 }
 
 extension Set where Element == IgnoredParameter {
