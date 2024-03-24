@@ -9,3 +9,11 @@
 /// produces a tuple `(x + y, "x + y")`.
 @freestanding(expression)
 public macro stringify<T>(_ value: T) -> (T, String) = #externalMacro(module: "StitcherMacrosPlugins", type: "StringifyMacro")
+
+import StitcherMacrosPlugins
+
+@attached(peer, names: arbitrary)
+public macro InjectedArguments(
+    generator: String = "stitcher",
+    ignoring arguments: String...
+) = #externalMacro(module: "StitcherMacrosPlugins", type: "InjectedArgumentsMacro")
