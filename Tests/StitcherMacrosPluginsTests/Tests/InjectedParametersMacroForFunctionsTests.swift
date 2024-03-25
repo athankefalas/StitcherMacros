@@ -15,6 +15,7 @@ import XCTest
 // Cross-compiled tests may still make use of the macro itself in end-to-end tests.
 #if canImport(StitcherMacrosPlugins)
 import StitcherMacrosPlugins
+@testable import Stitcher
 
 final class InjectedParametersMacroForFunctionsTests: XCTestCase {
 
@@ -24,7 +25,7 @@ final class InjectedParametersMacroForFunctionsTests: XCTestCase {
 
 struct Container {
 
-    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}")
+    @InjectedParameters(generator: .stitcherTest)
     func foo(one: One) {}
 }
 
@@ -52,7 +53,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}")
+    @InjectedParameters(generator: .stitcherTest)
     func foo(one: One) async {}
 }
 
@@ -80,7 +81,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}")
+    @InjectedParameters(generator: .stitcherTest)
     func foo(one: One) throws {}
 }
 
@@ -108,7 +109,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}")
+    @InjectedParameters(generator: .stitcherTest)
     func foo(one: One) async throws {}
 }
 
@@ -136,7 +137,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}")
+    @InjectedParameters(generator: .stitcherTest)
     mutating func foo(one: One) {}
 }
 
@@ -164,7 +165,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}", ignoring: "other")
+    @InjectedParameters(generator: .stitcherTest, ignoring: "other")
     func foo(one: One, other: Other) {}
 }
 
@@ -194,7 +195,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}", ignoring: "other_")
+    @InjectedParameters(generator: .stitcherTest, ignoring: "other_")
     func foo(one: One, other: Other) {}
 }
 
@@ -224,7 +225,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}")
+    @InjectedParameters(generator: .stitcherTest)
     func foo<T>(one: T) {}
 }
 
