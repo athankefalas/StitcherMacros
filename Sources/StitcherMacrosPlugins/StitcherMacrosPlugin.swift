@@ -4,6 +4,7 @@ import SwiftSyntaxMacros
 @main
 struct StitcherMacrosPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
-        InjectedParametersMacro.self
+        InjectedParametersMacro.self,
+        PreferredInitializerMacro.self
     ]
 }

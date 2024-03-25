@@ -1,12 +1,32 @@
 //
-//  InjectedArgumentsDiagnostic+CustomStringConvertible.swift
+//  InjectedArgumentsDiagnostic.swift
 //
 //
-//  Created by Αθανάσιος Κεφαλάς on 23/3/24.
+//  Created by Αθανάσιος Κεφαλάς on 24/3/24.
 //
 
+import Foundation
 
-extension InjectedArgumentsDiagnostic: CustomStringConvertible {
+public struct InjectedParametersDiagnostic: Error {
+    
+    public enum DiagnosticCode {
+        case unknown
+        case unexpectedDeclarationKind
+        case malformedArguments
+        case unknownIgnoredParameter(String)
+        case cannotInjectGenericParameter(String)
+    }
+    
+    public let code: DiagnosticCode
+    
+    init(code: DiagnosticCode) {
+        self.code = code
+    }
+}
+
+// MARK: InjectedParametersDiagnostic + CustomStringConvertible
+
+extension InjectedParametersDiagnostic: CustomStringConvertible {
     
     public var description: String {
         switch code {

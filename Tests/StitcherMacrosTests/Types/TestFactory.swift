@@ -7,9 +7,9 @@
 
 import Foundation
 
+typealias DependencyGraph = TestFactory
+
 enum TestFactory {
-    
-    static let generator = "try! TestFactory.provide(type: {{PARAMETER_TYPE}}.self)"
     
     struct Failure: Error {}
     
@@ -43,7 +43,7 @@ enum TestFactory {
         entries.removeAll(where: { $0.id == entry.id })
     }
     
-    static func provide<T>(type: T.Type) throws -> T {
+    static func inject<T>(byType type: T.Type) throws -> T {
         let type = "\(type)"
         
         guard let entry = entries.first(where: { $0.type == type }),

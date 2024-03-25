@@ -18,3 +18,10 @@ final class StitcherMacrosTests: XCTestCase {
         XCTAssert(true)
     }
 }
+
+class Temp {
+    
+    @InjectedParameters
+    init(a: Int) {}
+    
+}

@@ -4,6 +4,7 @@ import StitcherMacrosPlugins
 public enum AttachedParentKind {
     case actorParent
     case classParent
+    case enumParent
     case structParent
 }
 
@@ -16,6 +17,15 @@ public enum AttachedParentKind {
 @attached(peer, names: arbitrary)
 public macro InjectedParameters(
     parent: AttachedParentKind = .classParent,
-    generator: String = "stitcher",
+    generator: String = "stitcherByType",
     ignoring ignoredArguments: String...
-) = #externalMacro(module: "StitcherMacrosPlugins", type: "InjectedParametersMacro")
+) = #externalMacro(
+    module: "StitcherMacrosPlugins",
+    type: "InjectedParametersMacro"
+)
+
+@attached(peer)
+public macro PreferredInitializer() = #externalMacro(
+    module: "StitcherMacrosPlugins",
+    type: "PreferredInitializerMacro"
+)

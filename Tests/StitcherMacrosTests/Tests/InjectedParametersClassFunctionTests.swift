@@ -12,17 +12,12 @@ final class InjectedParametersClassFunctionTests: XCTestCase {
     
     class TestableSubject {
         
-        @InjectedParameters(
-            generator: "try! TestFactory.provide(type: {{PARAMETER_TYPE}}.self)"
-        )
+        @InjectedParameters
         func stringified(number: Int) -> String {
             return number.description
         }
         
-        @InjectedParameters(
-            generator: "try! TestFactory.provide(type: {{PARAMETER_TYPE}}.self)",
-            ignoring: "factor"
-        )
+        @InjectedParameters(ignoring: "factor")
         func multiplied(number: Int, by factor: Int) -> Int {
             return number * factor
         }

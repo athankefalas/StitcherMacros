@@ -7,6 +7,11 @@
 
 struct InjectionCodeGenerator {
     
+    enum Names: String {
+        case stitcherByType
+        case stitcherByName
+    }
+    
     static let parameterNamePlaceholder = "{{PARAMETER_NAME}}"
     static let parameterTypePlaceholder = "{{PARAMETER_TYPE}}"
     
@@ -30,11 +35,23 @@ struct InjectionCodeGenerator {
             .replacingOccurrences(of: Self.parameterTypePlaceholder, with: parameterTypeName)
     }
     
+    static let defaultGenerator = InjectionCodeGenerator(
+        template: "try! DependencyGraph.inject(byType: \(Self.parameterTypePlaceholder).self)"
+    )
+    
     static func named(_ name: String) -> InjectionCodeGenerator? {
-        guard name == "stitcher" else {
+        
+        guard let name = Names(rawValue: name) else {
             return nil
         }
         
-        return InjectionCodeGenerator()
+        let namedGenerators: [Names : InjectionCodeGenerator] = [
+            .stitcherByType : .defaultGenerator,
+            .stitcherByName : InjectionCodeGenerator(
+                template: "try! DependencyGraph.inject(byName: \(Self.parameterNamePlaceholder).self)"
+            )
+        ]
+        
+       return namedGenerators[name]
     }
 }

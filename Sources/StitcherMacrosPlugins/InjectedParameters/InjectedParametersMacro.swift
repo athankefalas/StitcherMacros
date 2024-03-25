@@ -11,10 +11,8 @@ import SwiftSyntaxBuilder
 import SwiftCompilerPlugin
 
 public struct InjectedParametersMacro: PeerMacro {
-    typealias Diagnostic = InjectedArgumentsDiagnostic
-    
-    private static let rawAttributeSyntax = "@InjectedParameters"
-    
+    typealias Diagnostic = InjectedParametersDiagnostic
+        
     public static func expansion(
         of node: AttributeSyntax,
         providingPeersOf declaration: some DeclSyntaxProtocol,
@@ -61,7 +59,7 @@ public struct InjectedParametersMacro: PeerMacro {
         let isMutating = originalFunction.modifiers.contains(where: { $0.trimmedDescription == "mutating" })
         let needsTriviaEnvelope = originalFunction.attributes.count == 1 && !isMutating
         var attributes = originalFunction.attributes
-            .removingMacroDirective(Self.rawAttributeSyntax)
+            .removingMacroDirective(.injectedParameters)
             .addingDisfavoredOverload()
         
         if needsTriviaEnvelope {
@@ -149,8 +147,9 @@ public struct InjectedParametersMacro: PeerMacro {
         
         let needsTriviaEnvelope = originalInitializer.attributes.count == 1
         var attributes = originalInitializer.attributes
-            .removingMacroDirective(Self.rawAttributeSyntax)
+            .removingMacroDirective(.injectedParameters)
             .addingDisfavoredOverload()
+            .addingMacroDirective(.preferredInitializer)
         
         if needsTriviaEnvelope {
             attributes.leadingTrivia = .newline
@@ -161,14 +160,11 @@ public struct InjectedParametersMacro: PeerMacro {
         
         if originalInitializer.modifiers.isEmpty {
             modifiers.leadingTrivia = originalInitializer.initKeyword.leadingTrivia
-            originalInitializer.initKeyword.leadingTrivia = configuration.parent != .structParent ? .space : .init(stringLiteral: "")
+            originalInitializer.initKeyword.leadingTrivia = configuration.parent.usesReferenceSemantics ? .space : .init(stringLiteral: "")
         }
         
-        switch configuration.parent {
-        case .actorParent, .classParent:
+        if configuration.parent.usesReferenceSemantics {
             modifiers.append(.init(name: .keyword(.convenience)))
-        case .structParent:
-            break
         }
         
         let ignoredParameters = configuration.ignoredParameters
@@ -257,7 +253,7 @@ public struct InjectedParametersMacro: PeerMacro {
                 continue
             }
             
-            throw InjectedArgumentsDiagnostic(code: .unknownIgnoredParameter(ignoredParameter.rawValue))
+            throw InjectedParametersDiagnostic(code: .unknownIgnoredParameter(ignoredParameter.rawValue))
         }
     }
     
@@ -281,7 +277,7 @@ public struct InjectedParametersMacro: PeerMacro {
                 continue
             }
             
-            throw InjectedArgumentsDiagnostic(code: .cannotInjectGenericParameter(parameterName))
+            throw InjectedParametersDiagnostic(code: .cannotInjectGenericParameter(parameterName))
         }
     }
 }
