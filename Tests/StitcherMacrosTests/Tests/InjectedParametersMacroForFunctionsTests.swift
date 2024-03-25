@@ -17,7 +17,6 @@ import StitcherMacros
 #if canImport(StitcherMacrosPlugins)
 import StitcherMacrosPlugins
 
-
 final class InjectedParametersMacroForFunctionsTests: XCTestCase {
 
     func test_injectedParameters() {
