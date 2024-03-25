@@ -13,6 +13,7 @@ struct StitcherMacrosPlugin: CompilerPlugin {
 
 // Client
 /*
+ 
 import StitcherMacrosPlugins
 
 /// The kind of parent an attached peer macro has.
