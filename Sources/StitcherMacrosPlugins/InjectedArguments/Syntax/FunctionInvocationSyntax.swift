@@ -57,14 +57,27 @@ struct FunctionInvocationSyntax {
         )
     }
     
-    func blockWrappedSyntax() -> CodeBlockSyntax {
+    func blockWrappedSyntax(leadingTrivia: Trivia? = nil, trailingTrivia: Trivia? = nil) -> CodeBlockSyntax {
         let invocation = syntax()
         var statements = CodeBlockItemListSyntax()
+        
+        if let leadingTrivia {
+            statements.leadingTrivia = leadingTrivia
+        }
+        
+        if let trailingTrivia {
+            statements.trailingTrivia = trailingTrivia
+        }
+        
         statements.append(
             CodeBlockItemSyntax(item: CodeBlockItemSyntax.Item(invocation))
         )
         
-        return CodeBlockSyntax(statements: statements)
+        return CodeBlockSyntax(
+            leadingTrivia: nil,
+            statements: statements,
+            trailingTrivia: nil
+        )
     }
     
     private func invocationSyntax() -> ExprSyntax {

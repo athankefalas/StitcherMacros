@@ -58,12 +58,13 @@ public struct InjectedArgumentsMacro: PeerMacro {
             return []
         }
         
-        let needsTrivia = originalFunction.attributes.count == 1
+        let isMutating = originalFunction.modifiers.contains(where: { $0.trimmedDescription == "mutating" })
+        let needsTriviaEnvelope = originalFunction.attributes.count == 1 && !isMutating
         var attributes = originalFunction.attributes
             .removingMacroDirective(Self.rawAttributeSyntax)
             .addingDisfavoredOverload()
         
-        if needsTrivia {
+        if needsTriviaEnvelope {
             attributes.leadingTrivia = .newline
             attributes.trailingTrivia = .newline
         }

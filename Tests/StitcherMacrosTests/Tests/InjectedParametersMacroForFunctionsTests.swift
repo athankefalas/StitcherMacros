@@ -132,6 +132,34 @@ macros: testMacros
         )
     }
     
+    func test_injectedParameters_mutating() {
+        assertMacroExpansion(
+"""
+
+struct Container {
+
+    @InjectedArguments(generator: "GENERATED_{{PARAMETER_TYPE}}")
+    mutating func foo(one: One) {}
+}
+
+""",
+expandedSource:
+"""
+
+struct Container {
+    mutating func foo(one: One) {}
+
+    @_disfavoredOverload
+        mutating func foo() {
+        foo(one: GENERATED_One)
+    }
+}
+
+""",
+macros: testMacros
+        )
+    }
+    
     func test_injectedParameters_ignoringParameter() {
         assertMacroExpansion(
 """
