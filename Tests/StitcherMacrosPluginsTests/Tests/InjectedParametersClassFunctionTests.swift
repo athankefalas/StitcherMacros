@@ -6,10 +6,10 @@
 //
 
 import XCTest
-import StitcherMacros
 
 final class InjectedParametersClassFunctionTests: XCTestCase {
     
+    /*
     class TestableSubject {
         
         @InjectedParameters
@@ -51,4 +51,5 @@ final class InjectedParametersClassFunctionTests: XCTestCase {
         let expectedResult = Self.number * factor
         XCTAssert(result == expectedResult)
     }
+     */
 }

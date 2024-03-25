@@ -18,7 +18,7 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "StitcherMacros",
-            targets: ["StitcherMacros"]
+            targets: ["StitcherMacrosPlugins"]
         )
     ],
     dependencies: [
@@ -27,7 +27,7 @@ let package = Package(
     targets: [
         
         // Library that exposes a macro as part of its API, which is used in client programs.
-        .target(name: "StitcherMacros", dependencies: ["StitcherMacrosPlugins"]),
+//        .target(name: "StitcherMacros", dependencies: ["StitcherMacrosPlugins"]),
         
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
