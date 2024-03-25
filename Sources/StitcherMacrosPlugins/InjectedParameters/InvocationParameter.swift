@@ -55,7 +55,7 @@ enum InvocationParameter {
         }
     }
     
-    static func wrap(
+    static func wraping(
         from parameterSyntax: FunctionParameterSyntax,
         ignoredArguments: Set<IgnoredParameter>
     ) -> Self {

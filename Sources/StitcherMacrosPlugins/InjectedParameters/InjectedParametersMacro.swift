@@ -72,12 +72,7 @@ public struct InjectedParametersMacro: PeerMacro {
         let ignoredParameters = configuration.ignoredParameters
         let originalParameters = originalFunction.signature.parameterClause.parameters
         
-        try ensure(
-            configuration: configuration,
-            matchesParameters: originalParameters
-        )
-        
-        try ensure(
+        try validate(
             configuration: configuration,
             matchesGenerics: originalFunction.genericParameterClause,
             andParameters: originalParameters
@@ -85,7 +80,7 @@ public struct InjectedParametersMacro: PeerMacro {
         
         let synthesizedParameters = originalParameters.filter({ ignoredParameters.contains($0) })
         let invocationParameters = originalParameters.map({
-            InvocationParameter.wrap(from: $0, ignoredArguments: ignoredParameters)
+            InvocationParameter.wraping(from: $0, ignoredArguments: ignoredParameters)
         })
         
         let parameterClause = FunctionParameterClauseSyntax(
@@ -144,11 +139,111 @@ public struct InjectedParametersMacro: PeerMacro {
         configuration: InjectedParametersConfiguration
     ) throws -> [DeclSyntax] {
         
-        guard declaration.kind == .functionDecl || declaration.kind == .initializerDecl else {
-            throw Diagnostic(code: .unexpectedDeclarationKind)
+        guard var originalInitializer = declaration.as(InitializerDeclSyntax.self)?.trimmed else {
+            throw Diagnostic(code: .unknown)
         }
         
-        return []
+        if originalInitializer.signature.parameterClause.parameters.isEmpty {
+            return []
+        }
+        
+        let needsTriviaEnvelope = originalInitializer.attributes.count == 1
+        var attributes = originalInitializer.attributes
+            .removingMacroDirective(Self.rawAttributeSyntax)
+            .addingDisfavoredOverload()
+        
+        if needsTriviaEnvelope {
+            attributes.leadingTrivia = .newline
+            attributes.trailingTrivia = .newline
+        }
+        
+        var modifiers = originalInitializer.modifiers
+        
+        if originalInitializer.modifiers.isEmpty {
+            modifiers.leadingTrivia = originalInitializer.initKeyword.leadingTrivia
+            originalInitializer.initKeyword.leadingTrivia = configuration.parent != .structParent ? .space : .init(stringLiteral: "")
+        }
+        
+        switch configuration.parent {
+        case .actorParent, .classParent:
+            modifiers.append(.init(name: .keyword(.convenience)))
+        case .structParent:
+            break
+        }
+        
+        let ignoredParameters = configuration.ignoredParameters
+        let originalParameters = originalInitializer.signature.parameterClause.parameters
+        
+        try validate(
+            configuration: configuration,
+            matchesGenerics: originalInitializer.genericParameterClause,
+            andParameters: originalParameters
+        )
+        
+        let synthesizedParameters = originalParameters.filter({ ignoredParameters.contains($0) })
+        let invocationParameters = originalParameters.map({
+            InvocationParameter.wraping(from: $0, ignoredArguments: ignoredParameters)
+        })
+        
+        let parameterClause = FunctionParameterClauseSyntax(
+            parameters: synthesizedParameters
+        )
+        
+        let signature = FunctionSignatureSyntax(
+            leadingTrivia: originalInitializer.signature.leadingTrivia,
+            originalInitializer.signature.unexpectedBeforeParameterClause,
+            parameterClause: parameterClause,
+            originalInitializer.signature.unexpectedBetweenParameterClauseAndEffectSpecifiers,
+            effectSpecifiers: originalInitializer.signature.effectSpecifiers,
+            originalInitializer.signature.unexpectedBetweenEffectSpecifiersAndReturnClause,
+            returnClause: originalInitializer.signature.returnClause,
+            originalInitializer.signature.unexpectedAfterReturnClause,
+            trailingTrivia: originalInitializer.signature.trailingTrivia
+        )
+        
+        let invocation = InitializerInvocationSyntax(
+            configuration: configuration,
+            invocationTarget: "self",
+            invokedFunctionDeclaration: originalInitializer,
+            invocationParameters: invocationParameters
+        )
+        
+        let initializer = InitializerDeclSyntax(
+            leadingTrivia: originalInitializer.leadingTrivia,
+            originalInitializer.unexpectedBeforeAttributes,
+            attributes: attributes,
+            originalInitializer.unexpectedBetweenAttributesAndModifiers,
+            modifiers: modifiers,
+            originalInitializer.unexpectedBetweenModifiersAndInitKeyword,
+            initKeyword: originalInitializer.initKeyword,
+            originalInitializer.unexpectedBetweenInitKeywordAndOptionalMark,
+            optionalMark: originalInitializer.optionalMark,
+            originalInitializer.unexpectedBetweenOptionalMarkAndGenericParameterClause,
+            genericParameterClause: originalInitializer.genericParameterClause,
+            originalInitializer.unexpectedBetweenGenericParameterClauseAndSignature,
+            signature: signature,
+            originalInitializer.unexpectedBetweenSignatureAndGenericWhereClause,
+            genericWhereClause: originalInitializer.genericWhereClause,
+            originalInitializer.unexpectedBetweenGenericWhereClauseAndBody,
+            body: invocation.blockWrappedSyntax(),
+            originalInitializer.unexpectedAfterBody,
+            trailingTrivia: originalInitializer.trailingTrivia
+        )
+        
+        return [
+            DeclSyntax(initializer)
+        ]
+    }
+    
+    // MARK: AST Validation
+    
+    private static func validate(
+        configuration: InjectedParametersConfiguration,
+        matchesGenerics generics: GenericParameterClauseSyntax?,
+        andParameters parameters: FunctionParameterListSyntax
+    ) throws {
+        try ensure(configuration: configuration, matchesParameters: parameters)
+        try ensure(configuration: configuration, matchesGenerics: generics, andParameters: parameters)
     }
     
     private static func ensure(

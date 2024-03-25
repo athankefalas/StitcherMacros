@@ -9,15 +9,22 @@ import SwiftSyntax
 
 struct InjectedParametersConfiguration {
     
+    let parent: AttachedParentKind
     let generator: InjectionCodeGenerator
     let ignoredParameters: Set<IgnoredParameter>
     
     init() {
+        self.parent = .classParent
         self.generator = InjectionCodeGenerator()
         self.ignoredParameters = []
     }
     
-    init(generator: InjectionCodeGenerator, ignoredParameters: Set<IgnoredParameter>) {
+    init(
+        parent: AttachedParentKind,
+        generator: InjectionCodeGenerator,
+        ignoredParameters: Set<IgnoredParameter>
+    ) {
+        self.parent = parent
         self.generator = generator
         self.ignoredParameters = ignoredParameters
     }
@@ -30,6 +37,7 @@ struct InjectedParametersConfiguration {
     struct Parser {
         
         private enum Context: String, Hashable, CaseIterable {
+            case parent = "parent"
             case generator = "generator"
             case ignoredParameters = "ignoring"
             
@@ -74,6 +82,9 @@ struct InjectedParametersConfiguration {
             }
             
             return InjectedParametersConfiguration(
+                parent: try parseParent(
+                    rawValue: parsedElements[.parent] ?? []
+                ),
                 generator: try parseGenerator(
                     rawValue: parsedElements[.generator] ?? []
                 ),
@@ -81,6 +92,25 @@ struct InjectedParametersConfiguration {
                     rawValue: parsedElements[.ignoredParameters] ?? []
                 )
             )
+        }
+        
+        private func parseParent(
+            rawValue: [String]
+        ) throws -> AttachedParentKind {
+            
+            guard rawValue.count <= 1 else {
+                throw InjectedParametersMacro.Diagnostic(code: .malformedArguments)
+            }
+            
+            guard let first = rawValue.first?.removingPrefix(".") else {
+                return .classParent
+            }
+            
+            guard let parent = AttachedParentKind(rawValue: first) else {
+                throw InjectedParametersMacro.Diagnostic(code: .malformedArguments)
+            }
+            
+            return parent
         }
         
         private func parseGenerator(

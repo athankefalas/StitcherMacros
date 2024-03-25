@@ -18,14 +18,3 @@ final class StitcherMacrosTests: XCTestCase {
         XCTAssert(true)
     }
 }
-
-class Temp {
-        
-    let one: One
-    
-    @InjectedParameters(generator: "try! TestFactory.provide(type: {{PARAMETER_TYPE}}.self)")
-    init(one: One) {
-        self.one = one
-    }
-    
-}
