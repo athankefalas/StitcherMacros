@@ -18,6 +18,8 @@ extension InjectedArgumentsDiagnostic: CustomStringConvertible {
             return "Malformed arguments."
         case .unknownIgnoredParameter(let name):
             return "Malformed arguments. Ignored parameter '\(name)' does not match a known parameter name."
+        case .cannotInjectGenericParameter(let name):
+            return "Malformed arguments. Cannot inject generic parameter '\(name)'. Explicitly ignore the parameter."
         }
     }
 }

@@ -187,6 +187,8 @@ macros: testMacros
         )
     }
     
+    // MARK: Negative
+    
     func test_injectedParameters_ignoringUnknownParameter() {
         assertMacroExpansion(
 """
@@ -209,6 +211,36 @@ struct Container {
 diagnostics: [
     DiagnosticSpec(
         message: "Malformed arguments. Ignored parameter 'other_' does not match a known parameter name.",
+        line: 4,
+        column: 5
+    )
+],
+macros: testMacros
+        )
+    }
+    
+    func test_injectedParameters_notIgnoringGenericParameter() {
+        assertMacroExpansion(
+"""
+
+struct Container {
+
+    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}")
+    func foo<T>(one: T) {}
+}
+
+""",
+expandedSource:
+"""
+
+struct Container {
+    func foo<T>(one: T) {}
+}
+
+""",
+diagnostics: [
+    DiagnosticSpec(
+        message: "Malformed arguments. Cannot inject generic parameter 'one'. Explicitly ignore the parameter.",
         line: 4,
         column: 5
     )

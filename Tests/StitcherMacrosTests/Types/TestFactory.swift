@@ -9,7 +9,7 @@ import Foundation
 
 enum TestFactory {
     
-    static let generator = "TestFactory.provide(type: {{PARAMETER_TYPE}}.self)"
+    static let generator = "try! TestFactory.provide(type: {{PARAMETER_TYPE}}.self)"
     
     struct Failure: Error {}
     

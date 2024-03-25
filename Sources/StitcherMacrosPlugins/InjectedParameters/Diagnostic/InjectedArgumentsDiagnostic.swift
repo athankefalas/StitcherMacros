@@ -14,6 +14,7 @@ public struct InjectedArgumentsDiagnostic: Error {
         case unexpectedDeclarationKind
         case malformedArguments
         case unknownIgnoredParameter(String)
+        case cannotInjectGenericParameter(String)
     }
     
     public let code: DiagnosticCode

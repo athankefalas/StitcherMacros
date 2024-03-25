@@ -77,6 +77,12 @@ public struct InjectedParametersMacro: PeerMacro {
             matchesParameters: originalParameters
         )
         
+        try ensure(
+            configuration: configuration,
+            matchesGenerics: originalFunction.genericParameterClause,
+            andParameters: originalParameters
+        )
+        
         let synthesizedParameters = originalParameters.filter({ ignoredParameters.contains($0) })
         let invocationParameters = originalParameters.map({
             InvocationParameter.wrap(from: $0, ignoredArguments: ignoredParameters)
@@ -157,6 +163,30 @@ public struct InjectedParametersMacro: PeerMacro {
             }
             
             throw InjectedArgumentsDiagnostic(code: .unknownIgnoredParameter(ignoredParameter.rawValue))
+        }
+    }
+    
+    private static func ensure(
+        configuration: InjectedParametersConfiguration,
+        matchesGenerics generics: GenericParameterClauseSyntax?,
+        andParameters parameters: FunctionParameterListSyntax
+    ) throws {
+        
+        guard let generics else {
+            return
+        }
+        
+        let genericTypes = Set(generics.parameters.map({ $0.trimmed.name.description }))
+        
+        for parameter in parameters {
+            let parameterName = parameter.secondName?.trimmedDescription ?? parameter.firstName.trimmedDescription
+            let parameterType = parameter.type.trimmedDescription
+            
+            guard genericTypes.contains(parameterType) && !configuration.ignoredParameters.contains(parameter) else {
+                continue
+            }
+            
+            throw InjectedArgumentsDiagnostic(code: .cannotInjectGenericParameter(parameterName))
         }
     }
 }
