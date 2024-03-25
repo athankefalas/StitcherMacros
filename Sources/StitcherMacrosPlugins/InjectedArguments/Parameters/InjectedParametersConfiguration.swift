@@ -49,7 +49,7 @@ struct InjectedParametersConfiguration {
             }
             
             guard let argumentsExpressionList = arguments.as(LabeledExprListSyntax.self) else {
-                throw InjectedArgumentsMacro.Diagnostic(code: .malformedArguments)
+                throw InjectedParametersMacro.Diagnostic(code: .malformedArguments)
             }
             
             if argumentsExpressionList.isEmpty {
@@ -64,7 +64,7 @@ struct InjectedParametersConfiguration {
                 }
                 
                 guard let context = context else {
-                    throw InjectedArgumentsMacro.Diagnostic(code: .malformedArguments)
+                    throw InjectedParametersMacro.Diagnostic(code: .malformedArguments)
                 }
                 
                 var elements = parsedElements[context] ?? []
@@ -88,7 +88,7 @@ struct InjectedParametersConfiguration {
         ) throws -> InjectionCodeGenerator {
             
             guard rawValue.count <= 1 else {
-                throw InjectedArgumentsMacro.Diagnostic(code: .malformedArguments)
+                throw InjectedParametersMacro.Diagnostic(code: .malformedArguments)
             }
             
             guard let first = rawValue.first else {
@@ -105,7 +105,7 @@ struct InjectedParametersConfiguration {
             let sanitizedvalues = rawValue.map({ $0.trimmingCharacters(in: .whitespacesAndNewlines) })
             
             guard sanitizedvalues.allSatisfy({ !$0.contains(" ") && !$0.contains("\t") && !$0.contains("\n") }) else {
-                throw InjectedArgumentsMacro.Diagnostic(code: .malformedArguments)
+                throw InjectedParametersMacro.Diagnostic(code: .malformedArguments)
             }
             
             return Set(sanitizedvalues.map({ IgnoredParameter(rawValue: $0) }))

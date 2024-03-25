@@ -8,7 +8,7 @@ import StitcherMacros
 import StitcherMacrosPlugins
 
 let testMacros: [String: Macro.Type] = [
-    "InjectedArguments": InjectedArgumentsMacro.self,
+    "InjectedParameters": InjectedParametersMacro.self,
 ]
 #endif
 

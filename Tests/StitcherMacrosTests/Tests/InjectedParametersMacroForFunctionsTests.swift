@@ -26,7 +26,7 @@ final class InjectedParametersMacroForFunctionsTests: XCTestCase {
 
 struct Container {
 
-    @InjectedArguments(generator: "GENERATED_{{PARAMETER_TYPE}}")
+    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}")
     func foo(one: One) {}
 }
 
@@ -54,7 +54,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedArguments(generator: "GENERATED_{{PARAMETER_TYPE}}")
+    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}")
     func foo(one: One) async {}
 }
 
@@ -82,7 +82,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedArguments(generator: "GENERATED_{{PARAMETER_TYPE}}")
+    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}")
     func foo(one: One) throws {}
 }
 
@@ -110,7 +110,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedArguments(generator: "GENERATED_{{PARAMETER_TYPE}}")
+    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}")
     func foo(one: One) async throws {}
 }
 
@@ -138,7 +138,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedArguments(generator: "GENERATED_{{PARAMETER_TYPE}}")
+    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}")
     mutating func foo(one: One) {}
 }
 
@@ -166,7 +166,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedArguments(generator: "GENERATED_{{PARAMETER_TYPE}}", ignoring: "other")
+    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}", ignoring: "other")
     func foo(one: One, other: Other) {}
 }
 
@@ -194,7 +194,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedArguments(generator: "GENERATED_{{PARAMETER_TYPE}}", ignoring: "other_")
+    @InjectedParameters(generator: "GENERATED_{{PARAMETER_TYPE}}", ignoring: "other_")
     func foo(one: One, other: Other) {}
 }
 

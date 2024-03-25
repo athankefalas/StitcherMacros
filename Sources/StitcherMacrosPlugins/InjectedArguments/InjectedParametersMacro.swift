@@ -1,5 +1,5 @@
 //
-//  InjectedArgumentsMacro.swift
+//  InjectedParametersMacro.swift
 //
 //
 //  Created by Αθανάσιος Κεφαλάς on 23/3/24.
@@ -10,10 +10,10 @@ import SwiftSyntaxMacros
 import SwiftSyntaxBuilder
 import SwiftCompilerPlugin
 
-public struct InjectedArgumentsMacro: PeerMacro {
+public struct InjectedParametersMacro: PeerMacro {
     typealias Diagnostic = InjectedArgumentsDiagnostic
     
-    private static let rawAttributeSyntax = "@InjectedArguments"
+    private static let rawAttributeSyntax = "@InjectedParameters"
     
     public static func expansion(
         of node: AttributeSyntax,
