@@ -48,7 +48,7 @@ let package = Package(
 
         // A test target used to develop the macro implementation.
         .testTarget(
-            name: "StitcherMacrosPluginsTests",
+            name: "StitcherMacrosTests",
             dependencies: [
                 "StitcherMacros",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
