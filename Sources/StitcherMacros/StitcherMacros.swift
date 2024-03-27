@@ -5,7 +5,7 @@
 //  Created by Αθανάσιος Κεφαλάς on 25/3/24.
 //
 
-import Stitcher
+@_exported import Stitcher
 import StitcherMacrosPlugins
 
 /// The kind of parent an attached peer macro has.
@@ -36,4 +36,18 @@ public macro InjectedParameters(
 public macro PreferredInitializer() = #externalMacro(
     module: "StitcherMacrosPlugins",
     type: "PreferredInitializerMacro"
+)
+
+@attached(
+    extension,
+    conformances: RegisterableDependency, AutoregisterableDependency,
+    names: named(dependencyRegistration), named(dependencyName), named(dependencyValue)
+)
+public macro Registerable(
+    by locator: DependencyLocator = .name(""),
+    scope: DependencyScope = .singleton,
+    eagerness: DependencyEagerness = .lazy
+) = #externalMacro(
+    module: "StitcherMacrosPlugins",
+    type: "RegisterableMacro"
 )

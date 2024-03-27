@@ -13,6 +13,27 @@ import SwiftCompilerPlugin
 public struct PreferredInitializerMacro: PeerMacro {
     typealias Diagnostic = PreferredInitializerDiagnostic
     
+    static func supports(initializer: InitializerDeclSyntax) -> Bool {
+        
+        if initializer.genericParameterClause != nil {
+            return false
+        }
+        
+        if initializer.signature.effectSpecifiers?.asyncSpecifier != nil {
+            return false
+        }
+        
+        if initializer.signature.effectSpecifiers?.throwsSpecifier != nil {
+            return false
+        }
+        
+        if initializer.optionalMark != nil {
+            return false
+        }
+        
+        return true
+    }
+    
     public static func expansion(
         of node: AttributeSyntax,
         providingPeersOf declaration: some DeclSyntaxProtocol,
@@ -26,7 +47,19 @@ public struct PreferredInitializerMacro: PeerMacro {
         }
         
         if initializer.genericParameterClause != nil {
-            throw Diagnostic(code: .unexpectedGenericArgument)
+            throw Diagnostic(code: .unsupportedGenericArgument)
+        }
+        
+        if initializer.signature.effectSpecifiers?.asyncSpecifier != nil {
+            throw Diagnostic(code: .unsupportedAsynchronous)
+        }
+        
+        if initializer.signature.effectSpecifiers?.throwsSpecifier != nil {
+            throw Diagnostic(code: .unsupportedThrowing)
+        }
+        
+        if initializer.optionalMark != nil {
+            throw Diagnostic(code: .unsupportedFailable)
         }
         
         return []

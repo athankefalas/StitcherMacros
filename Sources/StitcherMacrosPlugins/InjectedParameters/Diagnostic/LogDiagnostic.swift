@@ -23,7 +23,7 @@ struct LogDiagnostic: Error, CustomStringConvertible {
 
 extension Macro {
     
-    static func log(_ message: String) throws {
+    static func log(_ message: String) throws -> Never {
         throw LogDiagnostic(message)
     }
 }

@@ -18,6 +18,10 @@ extension AttributeListSyntax.Element {
 
 extension AttributeListSyntax {
     
+    func containsMacro(_ macro: DefinedMacro) -> Bool {
+        return contains(where: { $0.trimmed.description == macro.rawValue })
+    }
+    
     mutating func addMacroDirective(_ macro: DefinedMacro) {
         var macroSyntax = AttributeSyntax(stringLiteral: macro.rawValue)
         macroSyntax.leadingTrivia = .newline
@@ -41,9 +45,13 @@ extension AttributeListSyntax {
         self.filter({ !$0.trimmed.description.contains(macro.rawValue) })
     }
     
+    func contains(_ element: AttributeListSyntax.Element) -> Bool {
+        self.contains(where: { $0.trimmed.description == element.trimmedDescription })
+    }
+    
     mutating func addDisfavoredOverload() {
         
-        guard !self.contains(where: { $0.trimmed.description == disfavoredOverloadAttribute.description }) else {
+        guard !self.contains(.disfavoredOverload()) else {
             return
         }
         

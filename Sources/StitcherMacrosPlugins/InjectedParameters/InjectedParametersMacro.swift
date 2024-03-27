@@ -76,10 +76,15 @@ public struct InjectedParametersMacro: PeerMacro {
             andParameters: originalParameters
         )
         
-        let synthesizedParameters = originalParameters.filter({ ignoredParameters.contains($0) })
+        var synthesizedParameters = originalParameters.filter({ ignoredParameters.contains($0) })
         let invocationParameters = originalParameters.map({
             InvocationParameter.wraping(from: $0, ignoredArguments: ignoredParameters)
         })
+        
+        if synthesizedParameters.count > 0 {
+            let lastIndex = synthesizedParameters.index(before: synthesizedParameters.endIndex)
+            synthesizedParameters[lastIndex].trailingComma = nil
+        }
         
         let parameterClause = FunctionParameterClauseSyntax(
             parameters: synthesizedParameters
@@ -149,7 +154,10 @@ public struct InjectedParametersMacro: PeerMacro {
         var attributes = originalInitializer.attributes
             .removingMacroDirective(.injectedParameters)
             .addingDisfavoredOverload()
-            .addingMacroDirective(.preferredInitializer)
+        
+        if PreferredInitializerMacro.supports(initializer: originalInitializer) {
+            attributes.addMacroDirective(.preferredInitializer)
+        }
         
         if needsTriviaEnvelope {
             attributes.leadingTrivia = .newline
@@ -176,10 +184,15 @@ public struct InjectedParametersMacro: PeerMacro {
             andParameters: originalParameters
         )
         
-        let synthesizedParameters = originalParameters.filter({ ignoredParameters.contains($0) })
+        var synthesizedParameters = originalParameters.filter({ ignoredParameters.contains($0) })
         let invocationParameters = originalParameters.map({
             InvocationParameter.wraping(from: $0, ignoredArguments: ignoredParameters)
         })
+        
+        if synthesizedParameters.count > 0 {
+            let lastIndex = synthesizedParameters.index(before: synthesizedParameters.endIndex)
+            synthesizedParameters[lastIndex].trailingComma = nil
+        }
         
         let parameterClause = FunctionParameterClauseSyntax(
             parameters: synthesizedParameters

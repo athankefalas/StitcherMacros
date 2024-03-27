@@ -66,7 +66,7 @@ struct InjectedParametersConfiguration {
             }
             
             for labeledExpression in argumentsExpressionList {
-                let value = labeledExpression.expression.trimmedDescription.removeEnvelope(of: "\"")
+                let value = labeledExpression.expression.trimmedDescription.removingEnvelope(.doubleQuotes)
                 
                 if let newContext = Context.parsing(label: labeledExpression.label?.trimmed.text) {
                     context = newContext
@@ -103,7 +103,7 @@ struct InjectedParametersConfiguration {
                 throw InjectedParametersMacro.Diagnostic(code: .malformedArguments)
             }
             
-            guard let first = sanitizeAttachedParentKind(rawValue.first) else {
+            guard let first = rawValue.first?.parsingCaseName() else {
                 return .classParent
             }
             
@@ -114,17 +114,6 @@ struct InjectedParametersConfiguration {
             return parent
         }
         
-        private func sanitizeAttachedParentKind(_ rawValue: String?) -> String? {
-            
-            guard let rawValue else {
-                return nil
-            }
-            
-            return rawValue.replacingOccurrences(of: "AttachedParentKind", with: "")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-                .removingPrefix(".")
-        }
-        
         private func parseGenerator(
             rawValue: [String]
         ) throws -> any InjectionCodeGenerator {
@@ -133,38 +122,13 @@ struct InjectedParametersConfiguration {
                 return InjectionCodeGenerators.defaultGenerator
             }
             
-            guard let rawName = sanitizeInjectionCodeGeneratorName(rawValue.first),
+            guard let rawName = rawValue.first?.parsingCaseName(),
                   rawValue.count == 1,
                   let name = InjectionCodeGenerators.Name.allCases.first(where: { $0.rawValue == rawName }) else {
                 throw InjectedParametersDiagnostic(code: .malformedArguments)
             }
             
             return InjectionCodeGenerators.generator(named: name)
-        }
-        
-        private func sanitizeInjectionCodeGeneratorName(_ name: String?) -> String? {
-            
-            guard let name else {
-                return nil
-            }
-            
-            if name.hasPrefix(".") {
-                return name.removingPrefix(".")
-            }
-            
-            guard name.contains(".") else {
-                return name
-            }
-            
-            for component in name.split(separator: ".").reversed() {
-                guard component.count > 0 else {
-                    continue
-                }
-                
-                return String(component)
-            }
-            
-            return name
         }
         
         private func parseIgnoredArguments(

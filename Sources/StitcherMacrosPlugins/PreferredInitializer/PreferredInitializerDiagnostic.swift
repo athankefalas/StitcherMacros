@@ -12,7 +12,10 @@ public struct PreferredInitializerDiagnostic: Error {
     public enum DiagnosticCode {
         case unknown
         case unexpectedDeclarationKind
-        case unexpectedGenericArgument
+        case unsupportedGenericArgument
+        case unsupportedAsynchronous
+        case unsupportedFailable
+        case unsupportedThrowing
     }
     
     public let code: DiagnosticCode
@@ -32,8 +35,14 @@ extension PreferredInitializerDiagnostic: CustomStringConvertible {
             return "An unexpected error occured while expanding the macro. Please consider filing a bug report."
         case .unexpectedDeclarationKind:
             return "This macro can only be used on initializer declarations."
-        case .unexpectedGenericArgument:
+        case .unsupportedGenericArgument:
             return "Generic arguments are not supported."
+        case .unsupportedAsynchronous:
+            return "Async initializers are not supported."
+        case .unsupportedFailable:
+            return "Failable initializers are not supported."
+        case .unsupportedThrowing:
+            return "Throwing initializers are not supported."
         }
     }
 }
