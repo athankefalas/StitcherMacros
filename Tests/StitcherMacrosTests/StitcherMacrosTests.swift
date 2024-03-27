@@ -22,7 +22,6 @@ final class StitcherMacrosTests: XCTestCase {
     
 #if canImport(StitcherMacrosPlugins)
     func test_parsing() {
-        
     }
 #endif
 }
@@ -31,7 +30,7 @@ protocol Fake {}
 protocol OtherFake {}
 
 @Registerable(by: .name("nAmE"), scope: .instance, eagerness: .lazy)
-public final class AD: Fake {
+public class AD: Fake {
     
     private init(a: Int, b ba: Int) {}
 }

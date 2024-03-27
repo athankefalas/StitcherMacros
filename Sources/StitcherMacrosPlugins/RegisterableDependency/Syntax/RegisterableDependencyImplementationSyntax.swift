@@ -5,11 +5,13 @@
 //  Created by Αθανάσιος Κεφαλάς on 26/3/24.
 //
 
+import Stitcher
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
 public struct RegisterableDependencyImplementationSyntax<T: TypeSyntaxProtocol, Definition: DeclGroupSyntax> {
     
+    private let generator: AutoregisterableDependencyCodeGenerator
     private let configuration: RegisterableConfiguration
     private let typeDeclaration: T
     private let typeDefinition: Definition
@@ -21,6 +23,7 @@ public struct RegisterableDependencyImplementationSyntax<T: TypeSyntaxProtocol, 
         definition: Definition,
         preferredInitializer: InitializerDeclSyntax
     ) {
+        self.generator = AutoregisterableDependencyCodeGenerator()
         self.configuration = configuration
         self.typeDeclaration = type
         self.typeDefinition = definition
@@ -51,7 +54,7 @@ public struct RegisterableDependencyImplementationSyntax<T: TypeSyntaxProtocol, 
             )
         )
         
-        return propertyDeclaration.memberWrappedSyntax()
+        return propertyDeclaration.memberWrappedSyntax(leadingTrivia: .newline)
     }
     
     private func dependencyRegistrationMemberSyntax() -> MemberBlockItemSyntax {
@@ -60,49 +63,51 @@ public struct RegisterableDependencyImplementationSyntax<T: TypeSyntaxProtocol, 
             mutability: .constant,
             accessModifier: .fromType(typeDeclaration: typeDefinition),
             propertyType: nil,
-            propertyName: "dependencyRegistration",
+            propertyName: generator.autoregistrationContainerPropertyName(),
             propertyValue: InitializerClauseSyntax(
                 value: generatedDependencyInitializerExpression()
             )
         )
         
-        return propertyDeclaration.memberWrappedSyntax()
+        return propertyDeclaration.memberWrappedSyntax(leadingTrivia: .newline)
     }
     
     private func generatedDependencyInitializerExpression() -> ExprSyntaxProtocol {
-        let type = "GeneratedDependencyRegistration"
+        let type = generator.generateAutoregistrationContainerExpression(
+            typeName: typeDeclaration.trimmedDescription
+        )
+        
         var arguments = LabeledExprListSyntax()
+        let containerArguments = generator.autoregistrationContainerOrderedArguments()
         
         let locator = configuration.locator ?? .locator(forType: typeDeclaration)
-        arguments.append(
-            LabeledExprSyntax(
-                leadingTrivia: .newline,
-                label: "locator",
-                colon: .colonToken(),
-                expression: ExprSyntax(stringLiteral: locator.rawValue),
-                trailingComma: .commaToken()
-            )
-        )
-        
         let scope = configuration.scope ?? .automatic(forType: typeDeclaration)
-        arguments.append(
-            LabeledExprSyntax(
-                leadingTrivia: .newline,
-                label: "scope",
-                colon: .colonToken(),
-                expression: ExprSyntax(stringLiteral: scope.rawValue),
-                trailingComma: .commaToken()
-            )
-        )
+        let rawEagerness = ".\(configuration.eagerness.caseName)"
         
-        arguments.append(
-            LabeledExprSyntax(
+        let rawValues: [AutoregisterableDependencyCodeGenerator.Arguments : String] = [
+            .dependencyLocator : locator.rawValue,
+            .dependencyScope : scope.rawValue,
+            .dependencyEagerness : rawEagerness
+        ]
+        
+        for argumentIndexPair in containerArguments.enumerated() {
+            let containerArgument = argumentIndexPair.element
+            let isLast = argumentIndexPair.offset >= containerArguments.count - 1
+            
+            guard let value = rawValues[containerArgument] else {
+                continue
+            }
+            
+            let argument = LabeledExprSyntax(
                 leadingTrivia: .newline,
-                label: "eagerness",
+                label: TokenSyntax(stringLiteral: containerArgument.rawValue),
                 colon: .colonToken(),
-                expression: ExprSyntax(stringLiteral: ".\(configuration.eagerness)")
+                expression: ExprSyntax(stringLiteral: value),
+                trailingComma: isLast ? .none : .commaToken()
             )
-        )
+            
+            arguments.append(argument)
+        }
         
         return FunctionCallExprSyntax(
             calledExpression: ExprSyntax(stringLiteral: type),
@@ -187,5 +192,17 @@ public struct RegisterableDependencyImplementationSyntax<T: TypeSyntaxProtocol, 
         )
         
         return statements
+    }
+}
+
+fileprivate extension DependencyEagerness {
+    
+    var caseName: String {
+        switch self {
+        case .lazy:
+            return "lazy"
+        case .eager:
+            return "eager"
+        }
     }
 }
