@@ -1,0 +1,11 @@
+#
+# Example configuration for sourcery:
+#
+# - Note: The config file must be renamed to '.sourcery.yml' when used with 'sourcery --config'.
+#
+sources:
+  - . # One or more Sources or project root folders
+templates:
+  - ./AutoregisteredDependencyGroup.stencil # Stencil template name
+output:
+  DependencyGroup+AutoregisterableDependency.swift # Name of the output file

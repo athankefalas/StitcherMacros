@@ -6,7 +6,6 @@
 //
 
 @_exported import Stitcher
-//import StitcherMacrosPlugins
 
 /// The kind of parent an attached peer macro has.
 public enum AttachedParentKind {
