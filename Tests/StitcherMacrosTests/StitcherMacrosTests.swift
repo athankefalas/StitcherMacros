@@ -19,11 +19,6 @@ final class StitcherMacrosTests: XCTestCase {
     func test() {
         XCTAssert(true)
     }
-    
-#if canImport(StitcherMacrosPlugins)
-    func test_parsing() {
-    }
-#endif
 }
 
 protocol Fake {}
@@ -33,19 +28,4 @@ protocol OtherFake {}
 public class AD: Fake {
     
     private init(a: Int, b ba: Int) {}
-}
-
-class Asdf {
-    
-    static let dependencyName: DependencyLocator = .name("nAmE")
-    
-    static let dependencyRegistration = GeneratedDependencyRegistration(
-        locator: .name("nAmE"),
-        scope: .instance,
-        eagerness: .lazy
-    ) {
-        Asdf()
-    }
-    
-    private init() {}
 }

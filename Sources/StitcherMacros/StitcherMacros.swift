@@ -51,3 +51,4 @@ public macro Registerable(
     module: "StitcherMacrosPlugins",
     type: "RegisterableMacro"
 )
+
