@@ -16,6 +16,7 @@ public struct RegisterableConfiguration {
             case name
             case type
             case value
+            case custom
         }
         
         let kind: Kind
@@ -45,7 +46,7 @@ public struct RegisterableConfiguration {
             case "value":
                 self.kind = .value
             default:
-                return nil
+                self.kind = .custom
             }
         }
         

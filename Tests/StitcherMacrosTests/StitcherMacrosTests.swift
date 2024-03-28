@@ -20,12 +20,3 @@ final class StitcherMacrosTests: XCTestCase {
         XCTAssert(true)
     }
 }
-
-protocol Fake {}
-protocol OtherFake {}
-
-@Registerable(by: .name("nAmE"), scope: .instance, eagerness: .lazy)
-public class AD: Fake {
-    
-    private init(a: Int, b ba: Int) {}
-}
