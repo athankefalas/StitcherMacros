@@ -9,7 +9,7 @@ import Stitcher
 import SwiftSyntax
 import SwiftSyntaxBuilder
 
-public struct RegisterableDependencyImplementationSyntax<T: TypeSyntaxProtocol, Definition: DeclGroupSyntax> {
+struct RegisterableDependencyImplementationSyntax<T: TypeSyntaxProtocol, Definition: DeclGroupSyntax> {
     
     private let generator: AutoregisterableDependencyCodeGenerator
     private let configuration: RegisterableConfiguration

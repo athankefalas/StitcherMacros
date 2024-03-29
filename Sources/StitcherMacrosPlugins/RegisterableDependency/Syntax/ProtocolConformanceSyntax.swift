@@ -7,7 +7,7 @@
 
 import SwiftSyntax
 
-public struct ProtocolConformanceSyntax {
+struct ProtocolConformanceSyntax {
     
     private let protocols: [TypeSyntax]
     

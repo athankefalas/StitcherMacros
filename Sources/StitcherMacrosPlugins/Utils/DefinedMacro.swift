@@ -10,4 +10,5 @@ import Foundation
 enum DefinedMacro: String {
     case injectedParameters = "@InjectedParameters"
     case preferredInitializer = "@PreferredInitializer"
+    case registerable = "@Registerable"
 }
