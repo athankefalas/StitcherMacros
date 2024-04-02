@@ -39,7 +39,7 @@ struct InjectedParametersConfiguration {
         
         private enum Context: String, Hashable, CaseIterable {
             case parent = "parent"
-            case generator = "generator"
+            case generator = "strategy"
             case ignoredParameters = "ignoring"
             
             static func parsing(label: String?) -> Self? {

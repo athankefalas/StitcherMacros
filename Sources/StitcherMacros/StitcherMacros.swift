@@ -22,8 +22,8 @@ public enum AttachedParentKind {
 /// Creates a copy of the function or initializer it is attached to, that uses automatically injected arguments.
 ///
 /// - Parameters:
-///   - parentKind: The kind of the enclosing type. This can be useful when applying this macro to initializers.
-///   - generator: The code generation template used to generate the injection code.
+///   - parent: The kind of the enclosing type. This can be useful when applying this macro to initializers.
+///   - strategy: The used to inject dependencies in the generated function or initializer.
 ///   - ignoredParameters: The names of  the function or initializer parameters that should **not** be automatically injected.
 ///
 /// - Note: When attaching this macro on the initializer of a `struct` or an `enum` the type semantics must be provided. This is
@@ -32,8 +32,8 @@ public enum AttachedParentKind {
 @attached(peer, names: arbitrary)
 public macro InjectedParameters(
     parent: AttachedParentKind = .classParent,
-    generator: InjectionCodeGenerators.Name = .stitcherByType,
-    ignoring ignoredArguments: String...
+    strategy generator: InjectionCodeGenerators.Name = .stitcherByType,
+    ignoring ignoredParameters: String...
 ) = #externalMacro(
     module: "StitcherMacrosPlugins",
     type: "InjectedParametersMacro"

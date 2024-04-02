@@ -15,7 +15,7 @@ public struct PreferredInitializerMacro: PeerMacro {
     
     static func supports(initializer: InitializerDeclSyntax) -> Bool {
         
-        if initializer.genericParameterClause != nil {
+        if hasGenericArguments(declaration: initializer) {
             return false
         }
         
@@ -46,7 +46,7 @@ public struct PreferredInitializerMacro: PeerMacro {
             throw Diagnostic(code: .unexpectedDeclarationKind)
         }
         
-        if initializer.genericParameterClause != nil {
+        if hasGenericArguments(declaration: initializer) {
             throw Diagnostic(code: .unsupportedGenericArgument)
         }
         
@@ -63,5 +63,27 @@ public struct PreferredInitializerMacro: PeerMacro {
         }
         
         return []
+    }
+    
+    private static func hasGenericArguments(
+        declaration initializer: InitializerDeclSyntax
+    ) -> Bool {
+        
+        if initializer.genericParameterClause != nil {
+            return true
+        }
+        
+        let parameterNames = initializer.signature
+            .parameterClause
+            .parameters
+            .map({ $0.type.trimmedDescription })
+        
+        for parameterName in parameterNames {
+            if parameterName.hasPrefix("some ") {
+                return true
+            }
+        }
+        
+        return false
     }
 }

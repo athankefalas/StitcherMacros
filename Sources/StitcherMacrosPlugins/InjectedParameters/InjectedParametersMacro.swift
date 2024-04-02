@@ -276,17 +276,16 @@ public struct InjectedParametersMacro: PeerMacro {
         andParameters parameters: FunctionParameterListSyntax
     ) throws {
         
-        guard let generics else {
-            return
-        }
-        
+        let generics = generics ?? GenericParameterClauseSyntax(parameters: GenericParameterListSyntax())
         let genericTypes = Set(generics.parameters.map({ $0.trimmed.name.description }))
         
         for parameter in parameters {
             let parameterName = parameter.secondName?.trimmedDescription ?? parameter.firstName.trimmedDescription
             let parameterType = parameter.type.trimmedDescription
             
-            guard genericTypes.contains(parameterType) && !configuration.ignoredParameters.contains(parameter) else {
+            let isGenericParameter = genericTypes.contains(parameterType) || parameter.type.trimmedDescription.hasPrefix("some ")
+            
+            guard isGenericParameter && !configuration.ignoredParameters.contains(parameter) else {
                 continue
             }
             

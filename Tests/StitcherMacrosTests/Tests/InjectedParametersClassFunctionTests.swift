@@ -24,19 +24,24 @@ final class InjectedParametersClassFunctionTests: XCTestCase {
         }
     }
 
-    static var entry: TestFactory.Entry?
+    static var container: DependencyContainer?
     static var number: Int = { .random(in: 1...1000) }()
     
     override class func setUp() {
-        entry = TestFactory.add(number)
+        let container = DependencyContainer {
+            number
+        }
+        
+        Self.container = container
+        DependencyGraph.activate(container)
     }
     
     override class func tearDown() {
-        guard let entry else {
+        guard let container else {
             return
         }
         
-        TestFactory.remove(entry: entry)
+        DependencyGraph.deactivate(container)
     }
 
     func test_parameterInjection() {

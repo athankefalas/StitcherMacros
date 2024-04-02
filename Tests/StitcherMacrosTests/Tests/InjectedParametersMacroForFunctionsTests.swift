@@ -25,7 +25,7 @@ final class InjectedParametersMacroForFunctionsTests: XCTestCase {
 
 struct Container {
 
-    @InjectedParameters(generator: .stitcherTest)
+    @InjectedParameters(strategy: .stitcherTest)
     func foo(one: One) {}
 }
 
@@ -53,7 +53,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedParameters(generator: .stitcherTest)
+    @InjectedParameters(strategy: .stitcherTest)
     func foo(one: One) async {}
 }
 
@@ -81,7 +81,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedParameters(generator: .stitcherTest)
+    @InjectedParameters(strategy: .stitcherTest)
     func foo(one: One) throws {}
 }
 
@@ -109,7 +109,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedParameters(generator: .stitcherTest)
+    @InjectedParameters(strategy: .stitcherTest)
     func foo(one: One) async throws {}
 }
 
@@ -137,7 +137,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedParameters(generator: .stitcherTest)
+    @InjectedParameters(strategy: .stitcherTest)
     mutating func foo(one: One) {}
 }
 
@@ -165,7 +165,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedParameters(generator: .stitcherTest, ignoring: "other")
+    @InjectedParameters(strategy: .stitcherTest, ignoring: "other")
     func foo(one: One, other: Other) {}
 }
 
@@ -195,7 +195,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedParameters(generator: .stitcherTest, ignoring: "other_")
+    @InjectedParameters(strategy: .stitcherTest, ignoring: "other_")
     func foo(one: One, other: Other) {}
 }
 
@@ -225,7 +225,7 @@ macros: testMacros
 
 struct Container {
 
-    @InjectedParameters(generator: .stitcherTest)
+    @InjectedParameters(strategy: .stitcherTest)
     func foo<T>(one: T) {}
 }
 

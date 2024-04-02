@@ -115,9 +115,15 @@ struct InitializerInvocationSyntax {
             return ExprSyntax(stringLiteral: forwardedValue)
         }
         
+        var parameterTypeName = parameter.wrappedValue.type.trimmed.description
+        
+        if parameterTypeName.hasPrefix("any ") {
+            parameterTypeName = parameterTypeName.addingEnvelope(.parenthesis)
+        }
+        
         let generatedCode = configuration.generator.generateInjectionExpression(
-            parameterName: parameter.name,
-            parameterTypeName: parameter.wrappedValue.type.trimmed.description
+            parameterName: parameter.injectionName,
+            parameterTypeName: parameterTypeName
         )
         
         return ExprSyntax(stringLiteral: generatedCode)

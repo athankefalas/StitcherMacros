@@ -28,6 +28,21 @@ enum InvocationParameter {
         return rawName
     }
     
+    var injectionName: String? {
+        switch self {
+        case .injected(let parameter):
+            let rawName = parameter.secondName?.trimmedDescription ?? parameter.firstName.trimmedDescription
+            
+            if rawName == "_" {
+                return nil
+            }
+            
+            return rawName.addingEnvelope(.doubleQuotes)
+        case .forwarded:
+            return nil
+        }
+    }
+    
     var isForwarded: Bool {
         switch self {
         case .injected:

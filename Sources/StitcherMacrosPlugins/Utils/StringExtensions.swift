@@ -89,6 +89,10 @@ extension String {
             .removingEnvelope(envelope)
     }
     
+    func addingEnvelope(_ envelope: StringEnvelope) -> String {
+        return "\(envelope.start)\(self)\(envelope.end)"
+    }
+    
     func removingEnvelope(_ envelope: StringEnvelope) -> String {
         guard isPlaced(in: envelope) else {
             return self
