@@ -20,15 +20,3 @@ final class StitcherMacrosTests: XCTestCase {
         XCTAssert(true)
     }
 }
-
-struct Entity {}
-protocol EntityRepository {}
-
-class Service {
-    
-    @InjectedParameters(strategy: .stitcherByName)
-    func findAll(in repository: EntityRepository) -> [Entity] { [] }
-    
-    @InjectedParameters(strategy: .stitcherByName)
-    func clear(_ repository: EntityRepository) {}
-}

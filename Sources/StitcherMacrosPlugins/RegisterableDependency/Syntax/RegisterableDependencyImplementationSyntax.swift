@@ -43,14 +43,25 @@ struct RegisterableDependencyImplementationSyntax<T: TypeSyntaxProtocol, Definit
     
     private func dependencyLocatorValueMemberSyntax() -> MemberBlockItemSyntax {
         let propertyValue = configuration.locator ?? .locator(forType: typeDeclaration)
+        let rawPropertyValue: String
+        
+        switch propertyValue.kind {
+        case .name:
+            rawPropertyValue = propertyValue.rawValue.parsingAssociatedValue() ?? propertyValue.rawValue
+        case .value:
+            rawPropertyValue = propertyValue.rawValue.parsingAssociatedValue() ?? propertyValue.rawValue
+        default:
+            rawPropertyValue = propertyValue.rawValue
+        }
+        
         let propertyDeclaration = PropertyDeclarationSyntax(
             attachment: .type,
             mutability: .constant,
             accessModifier: .fromType(typeDeclaration: typeDefinition),
-            propertyType: "DependencyLocator",
+            propertyType: configuration.locator?.kind == .name ? "String" : "AnyHashable",
             propertyName: configuration.locator?.kind == .name ? "dependencyName" : "dependencyValue",
             propertyValue: InitializerClauseSyntax(
-                value: ExprSyntax(stringLiteral: propertyValue.rawValue)
+                value: ExprSyntax(stringLiteral: rawPropertyValue)
             )
         )
         
