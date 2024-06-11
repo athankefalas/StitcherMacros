@@ -1,7 +1,7 @@
 # Stitcher Macros
 
 <!-- # Badges -->
-[![License](https://img.shields.io/github/license/athankefalas/StitcherMacros)](https://github.com/athankefalas/StitcherMacros/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/athankefalas/StitcherMacros)](https://github.com/athankefalas/StitcherMacros/LICENSE)
 [![Release](https://img.shields.io/github/v/release/athankefalas/StitcherMacros)](https://github.com/athankefalas/StitcherMacros/releases/tag/v1.1.0)
 
 A support package for [Stitcher](https://github.com/athankefalas/Stitcher.git) that defines meta programming utilities using Swift macros, enabling automatic parameter injection for functions and initializers as well as utilities for automatic dependency registration.
